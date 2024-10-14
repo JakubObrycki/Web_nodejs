@@ -1,0 +1,48 @@
+---
+- name: 'Playbook to start K8s pod-service'
+  hosts: localhost
+  tasks:
+   - name: 'Deploy pod'
+     k8s:
+      name: node-app-pod
+      namespace: default
+      state: present
+      definition:
+       apiVersion: v1
+       kind: Pod
+       metadata:
+        name: node-app-pod
+        labels:
+         name: node-app-pod
+         app: node-app
+         type: front-end
+       spec:
+        containers:
+         - name: nodejs-pod
+           image: fafto/nodejs
+           ports:
+            - containerPort: 3000
+
+   - name: 'Task to start K8s service'
+     k8s:
+       name: 'service-k8s'
+       namespace: default
+       state: present
+       definition:
+         apiVersion: v1
+         kind: Service
+         metadata:
+            name: node-app-service
+         spec:
+           type: NodePort
+           ports:
+            - targetPort: 3000
+              port: 3000
+              nodePort: 30000
+         selector:
+           name: node-app-pod
+           app: node-app
+           type: front-end
+
+  
+
